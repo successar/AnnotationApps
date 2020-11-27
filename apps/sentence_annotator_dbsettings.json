@@ -1,0 +1,22 @@
+{
+    "name" : "sent_db",
+    "path" : "sentence_anno.db",
+    "schema" : {
+        "has_relation" : {
+            "username": "string",
+            "pmid": "string",
+            "relation": "string",
+            "para_id": "int",
+            "sent_id": "int"
+        },
+
+        "rationale_words" : {
+            "username": "string",
+            "pmid": "string",
+            "relation": "string",
+            "para_id": "int",
+            "sent_id" : "int",
+            "word_id" : "int"
+        }
+    }
+}
