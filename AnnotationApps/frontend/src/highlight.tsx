@@ -10,15 +10,17 @@ export function highlight_return() {
     let tablename = db_data["tablename"];
     delete db_data["tablename"];
 
-    let highlights = $(this).find(".highlightable").map(function() {
-        return [[$(this).data(), this.classList.contains("rationale")]] // Wrapping in second [] because JQuery is stupid and will flatten everything
+    let highlights = $(this).find(".highlightable.rationale").map(function() {
+        return $(this).data;
     }).get();
 
+    let api = (highlights.length > 0) ? "add" : "delete";
+
     return {
-        "api" : "add_or_delete_multiple",
+        "api" : api,
         "tablename" : tablename,
-        "common_keys" : db_data,
-        "multi_keys" : highlights
+        "keys" : db_data,
+        "value" : JSON.stringify(highlights)
     }
 } 
 

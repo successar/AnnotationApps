@@ -1,5 +1,14 @@
 print("Running html")
 import AnnotationApps.dbserver.api as dbapi
+from AnnotationApps.dbserver.models import create_table, exist_table
+import json
+
+
+def create_table_from_info(tablename, info_dict, value):
+    if not exist_table(tablename):
+        columns = {k: type(v) for k, v in info_dict.items()}
+        columns["value"] = type(value)
+        create_table(tablename, columns)
 
 
 class Page:
@@ -7,7 +16,9 @@ class Page:
         self._elements = []
         self._common_dict = common_dict
 
-        data_string = " ".join([f'data-{key}="{value}"' for key, value in common_dict.items()])
+        data_string = " ".join(
+            [f'data-{key}="{value}"' for key, value in common_dict.items()]
+        )
         common_block = f'<div data-type="common" {data_string}></div>'
         self._elements.append(common_block)
 
@@ -23,7 +34,9 @@ class Page:
         self._elements.append(self._block(widget.construct(self._common_dict)))
 
     def _button(self, label: str, _id: str, _type: str = "primary"):
-        return f'<button type="button" class="btn btn-{_type}" id="{_id}">{label}</button>'
+        return (
+            f'<button type="button" class="btn btn-{_type}" id="{_id}">{label}</button>'
+        )
 
     def _add_saving_group(self):
         self._elements.append(
@@ -58,9 +71,13 @@ class Checkbox(Widget):
         self._info_dict = info_dict
 
     def construct(self, info_dict):
-        value = len(dbapi.filter_rows(tablename=self._tablename, keys={**info_dict, **self._info_dict})) > 0
-        checked = "checked" if value else ""
-        data_string = " ".join([f'data-{key}="{value}"' for key, value in self._info_dict.items()])
+        combined_info_dict = {**info_dict, **self._info_dict}
+        create_table_from_info(self._tablename, combined_info_dict, value=0)
+        value = dbapi.get_value(tablename=self._tablename, keys=combined_info_dict)
+        checked = "checked" if value is not None else ""
+        data_string = " ".join(
+            [f'data-{key}="{value}"' for key, value in self._info_dict.items()]
+        )
         return f"""
             <div class="form-check">
                 <label class="form-check-label">
@@ -78,10 +95,17 @@ class Textbox(Widget):
         self._info_dict = info_dict
 
     def construct(self, info_dict):
-        data_string = " ".join([f'data-{key}="{value}"' for key, value in self._info_dict.items()])
+        combined_info_dict = {**info_dict, **self._info_dict}
+        create_table_from_info(self._tablename, combined_info_dict, value="")
+        value = (
+            dbapi.get_value(tablename=self._tablename, keys=combined_info_dict) or ""
+        )
+        data_string = " ".join(
+            [f'data-{key}="{value}"' for key, value in self._info_dict.items()]
+        )
         return f"""
             <label class="form-label">
-                {self._label} <input type="text" class="form-control db" data-tablename=\"{self._tablename}\" {data_string}>
+                {self._label} <input type="text" class="form-control db" data-tablename=\"{self._tablename}\" {data_string} value=\"{value}\">
             </label>
             """
 
@@ -94,14 +118,24 @@ class Choice(Widget):
         self._options = options
 
     def construct(self, info_dict):
-        data_string = " ".join([f'data-{key}="{value}"' for key, value in self._info_dict.items()])
+        combined_info_dict = {**info_dict, **self._info_dict}
+        create_table_from_info(self._tablename, combined_info_dict, value="")
+        value = dbapi.get_value(tablename=self._tablename, keys=combined_info_dict)
+        data_string = " ".join(
+            [f'data-{key}="{value}"' for key, value in self._info_dict.items()]
+        )
 
         return (
             f"""
             <label class="form-label"> {self._label}
                 <select class="form-control db" data-tablename=\"{self._tablename}\" {data_string}>
             """
-            + "\n".join([f'<option value="{option}">{option}</option>' for option in self._options])
+            + "\n".join(
+                [
+                    f'<option value="{option}" {"selected" if option == value else ""}>{option}</option>'
+                    for option in self._options
+                ]
+            )
             + """
                 </select>
             </label>
@@ -119,7 +153,9 @@ class Text(Widget):
         data_string = ""
         classes = " ".join(self._classes)
         if self._info_dict is not None:
-            data_string = " ".join([f'data-{key}="{value}"' for key, value in self._info_dict.items()])
+            data_string = " ".join(
+                [f'data-{key}="{value}"' for key, value in self._info_dict.items()]
+            )
 
         return f'<span class="{classes}" {data_string}>{self._text}</span>'
 
@@ -148,9 +184,22 @@ class HighlightableTextBlock(Widget):
         self._info_dict = info_dict
 
     def construct(self, info_dict):
-        rows = dbapi.filter_rows(tablename=self._tablename, keys={**info_dict, **self._info_dict})
-        words = [word.construct(is_highlighted=word._info_dict in rows) for word in self._words]
+        combined_info_dict = {**info_dict, **self._info_dict}
+        create_table_from_info(self._tablename, combined_info_dict, value="")
+
+        value = dbapi.get_value(tablename=self._tablename, keys=combined_info_dict)
+        if value is not None:
+            value = json.loads(value)
+        else:
+            value = []
+
+        words = [
+            word.construct(is_highlighted=word._info_dict in value)
+            for word in self._words
+        ]
         html = " ".join(words)
-        data_string = " ".join([f'data-{key}="{value}"' for key, value in self._info_dict.items()])
+        data_string = " ".join(
+            [f'data-{key}="{value}"' for key, value in self._info_dict.items()]
+        )
         return f'<div class="highlight" data-tablename="{self._tablename}" {data_string}>{html}</div>'
 

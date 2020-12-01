@@ -1,4 +1,6 @@
 import os
+import secrets
+
 import streamlit.components.v1 as components
 
 parent_dir = os.path.dirname(os.path.abspath(__file__))
@@ -10,6 +12,4 @@ else :
     _component_func = components.declare_component("document_viewer", path=build_dir)
 
 def annotation_block(page, key) :
-    return _component_func(data=page.html(), key=key)
-
-
+    return _component_func(data=page, key=key)
