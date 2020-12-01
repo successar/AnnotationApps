@@ -30,7 +30,15 @@ def basic_annotator(get_dataset, display, selector_elements=None):
 
     if username != "":
         dataset: Dict[str, Any] = get_dataset(**values)
-        assignments: Dict[str, bool] = get_history(dataset_idx=list(dataset.keys()), username=username)
+
+        state = SessionState.get(key=secrets.token_hex(128), assignments={}, get_next=True)
+
+        if state.get_next:
+            assignments: Dict[str, bool] = get_history(dataset_idx=list(dataset.keys()), username=username)
+            state.assignments = assignments
+            state.get_next = False
+        else:
+            assignments = state.assignments
 
         format_func = lambda x: (u"✅ " if assignments[x] else "❌ ") + x
         selected_assignment = st.sidebar.selectbox(
@@ -39,18 +47,27 @@ def basic_annotator(get_dataset, display, selector_elements=None):
 
         with st.spinner("Loading document"):
             state = SessionState.get(key=secrets.token_hex(128))
-            values = annotation_block(
-                page=display(dataset[selected_assignment], username=username, assignment=selected_assignment, key=state.key).html(),
-                key=state.key
+            annotations = annotation_block(
+                page=display(
+                    dataset[selected_assignment],
+                    username=username,
+                    assignment=selected_assignment,
+                    key=state.key
+                ),
+                key=state.key,
             )
 
             print("=" * 50)
-            print(values)
+            print(annotations)
             print("=" * 50)
 
-        if values is not None:
-            save(values["values"])
-            if values["next"] == True and assignments[selected_assignment] == False:
-                update_history(assignment=selected_assignment, username=username)
+        if annotations is not None:
+            save(annotations["values"])
+
+            if annotations["next"] == True:
+                if assignments[selected_assignment] == False:
+                    update_history(assignment=selected_assignment, username=username)
+                state.get_next = True
+
             state.key = secrets.token_hex(128)
             st.experimental_rerun()

@@ -37,29 +37,30 @@ def get_dataset() -> Dict[str, Any]:
 
     return dict(list(documents.items())[:5])
 
-@st.cache(allow_output_mutation=True)
+
+@st.cache(max_entries=1)
 def display(document: Any, username: str, assignment: str, key: str) -> anno.Page:
-    print("Running again")
+    print("******************* Running again display ********************")
     page = anno.Page({"username": username, "document_id": assignment})
 
     for para in document:
+        document_words = para.document.split()
+        page.add(anno.TextBlock(words=[anno.Text("Document :", classes=[])]))
         page.add(
-            anno.TextBlock(words=[anno.Text("Document: ", classes=[]), anno.Text(para.document, classes=[])])
+            anno.HighlightableTextBlock(
+                words=[anno.HighlightableText(text=word, classes=[], info_dict={"word_id" : i}) for i, word in enumerate(document_words)],
+                tablename="rationale_words",
+                info_dict={"annotation_id" : para.annotation_id}
+            )
         )
         page.add(anno.TextBlock(words=[anno.Text("Query: ", classes=[]), anno.Text(para.query, classes=[])]))
 
-        # page.add(
-        #     anno.Choice(
-        #         label="Label",
-        #         options=["no significant difference", "significantly increased", "significantly decreased"],
-        #         tablename="label",
-        #         info_dict={"annotation_id": para.annotation_id},
-        #     )
-        # )
-
         page.add(
-            anno.Checkbox(
-                label="Is Correct ?", tablename="correct", info_dict={"annotation_id": para.annotation_id}
+            anno.Choice(
+                label="Label",
+                options=["no significant difference", "significantly increased", "significantly decreased"],
+                tablename="label",
+                info_dict={"annotation_id": para.annotation_id},
             )
         )
         page.add(anno.HorizontalLine())

@@ -2,6 +2,7 @@ print("Running html")
 import AnnotationApps.dbserver.api as dbapi
 from AnnotationApps.dbserver.models import create_table, exist_table
 import json
+from typing import Dict
 
 
 def create_table_from_info(tablename, info_dict, value):
@@ -15,6 +16,7 @@ class Page:
     def __init__(self, common_dict):
         self._elements = []
         self._common_dict = common_dict
+        self._css = {}
 
         data_string = " ".join(
             [f'data-{key}="{value}"' for key, value in common_dict.items()]
@@ -24,8 +26,14 @@ class Page:
 
         self._add_saving_group()
 
+    def add_format(self, label: str, format: Dict[str, str]) :
+        self._css[label] = "{\n" + "\n".join(f"{k}: {v};" for k, v in format.items()) + "\n}"
+
     def html(self):
         return " ".join(self._elements)
+
+    def css(self) :
+        return "\n".join([f".{k} {v}\n" for k, v in self._css.items()])
 
     def _block(self, html):
         return f'<div class="row mt-3"><div class="col">{html}</div></div>'
@@ -47,6 +55,9 @@ class Page:
             </div>
             """
         )
+
+    def __hash__(self) :
+        return hash(self.html())
 
 
 class Widget:

@@ -14,7 +14,7 @@ function get_component_values() {
     let values = [];
     values = values.concat($("input[type=checkbox].db").map(checkbox_return).get());
     values = values.concat($(".highlight").map(highlight_return).get());
-    // values.concat($("select.db").map(element => select_return(element)));
+    values = values.concat($("select.db").map(select_return).get());
     return values;
 };
 
@@ -48,6 +48,7 @@ function onRender(event: Event): void {
         return;
     }
     $("#docdiv").html(data.args["data"]);
+    $("#head-style").append(data.args["css"]);
     setup();
     onstreamlitupdate();
     Streamlit.setFrameHeight()

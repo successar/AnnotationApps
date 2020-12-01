@@ -6,7 +6,7 @@ import os
 dbpath = os.environ["DBPATH"]
 
 conn_str = f"sqlite:///{dbpath}"
-engine = create_engine(conn_str, echo=True, connect_args={"check_same_thread": False})
+engine = create_engine(conn_str, connect_args={"check_same_thread": False})
 
 print("connection is ok")
 

@@ -12,4 +12,4 @@ else :
     _component_func = components.declare_component("document_viewer", path=build_dir)
 
 def annotation_block(page, key) :
-    return _component_func(data=page, key=key)
+    return _component_func(data=page.html(), css=page.css(), key=key)

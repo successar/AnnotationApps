@@ -11,7 +11,7 @@ export function highlight_return() {
     delete db_data["tablename"];
 
     let highlights = $(this).find(".highlightable.rationale").map(function() {
-        return $(this).data;
+        return $(this).data();
     }).get();
 
     let api = (highlights.length > 0) ? "add" : "delete";
