@@ -1,12 +1,12 @@
 import { Streamlit, RenderData } from "streamlit-component-lib"
 import $ from "jquery"
-import { highlight, highlight_return } from "./highlight"
+import { highlight_return, highlight_setup } from "./mark"
 import { checkbox_return, select_return } from "./widgets"
 
 let state = "idle";
 
 function setup() {
-    $(".highlight").on("mouseup", highlight);
+    highlight_setup();
 }
 
 
@@ -45,6 +45,7 @@ function onRender(event: Event): void {
     const data = (event as CustomEvent<RenderData>).detail
     if (state == "clicked") {
         state = "idle";
+        $("#docdiv").html("");
         return;
     }
     $("#docdiv").html(data.args["data"]);

@@ -23,12 +23,12 @@ def save(annotations: List[dict]):
 def basic_annotator(get_dataset, display, selector_elements=None):
     username = st.sidebar.text_input(label="Enter Username", key="username")
 
-    if selector_elements is not None:
-        values = selector_elements()
-    else:
-        values = {}
-
     if username != "":
+        if selector_elements is not None:
+            values = selector_elements()
+        else:
+            values = {}
+    
         dataset: Dict[str, Any] = get_dataset(**values)
 
         state = SessionState.get(key=secrets.token_hex(128), assignments={}, get_next=True)

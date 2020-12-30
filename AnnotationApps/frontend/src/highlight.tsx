@@ -29,23 +29,31 @@ export function highlight() {
     if (sel) {
         var range = sel.getRangeAt(0);
         var selectedNodes = getRangeSelectedNodes(range);
-        var visited_nodes = [];
-        selectedNodes.forEach(element => {
-            if (element.nodeType === Node.TEXT_NODE) {
-                element = element.parentNode;
-            }
-            if (element.nodeType === Node.ELEMENT_NODE && element.classList.contains("highlightable")) {
-                if (visited_nodes.includes(element)) {
-                    return [];
-                }
-                visited_nodes.push(element);
-                $(element).toggleClass("rationale");
-            }
-        });
-
+        var highlightable_nodes = filter_to_highlightable(selectedNodes);
+        highlightable_nodes.forEach(element => $(element).toggleClass("rationale"));
         sel.removeAllRanges();
     }
 };
+
+function filter_to_highlightable(selected_nodes) {
+    selected_nodes = selected_nodes.map(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            node = node.parentNode;
+            node = $(node).closest(".highlightable");
+            node = node ? node.get(0) : node;
+        }
+
+        if (node && node.classList.contains("highlightable")) {
+            return [node];
+        }
+        else {
+            return [];
+        }
+    });
+
+    return Array.from(new Set(selected_nodes.flat()));
+}
+
 
 function nextNode(node) {
     if (node.hasChildNodes()) {

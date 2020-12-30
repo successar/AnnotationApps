@@ -45,24 +45,40 @@ def display(document: Any, username: str, assignment: str, key: str) -> anno.Pag
 
     for para in document:
         document_words = para.document.split()
-        page.add(anno.TextBlock(words=[anno.Text("Document :", classes=[])]))
-        page.add(
-            anno.HighlightableTextBlock(
-                words=[anno.HighlightableText(text=word, classes=[], info_dict={"word_id" : i}) for i, word in enumerate(document_words)],
-                tablename="rationale_words",
-                info_dict={"annotation_id" : para.annotation_id}
-            )
-        )
-        page.add(anno.TextBlock(words=[anno.Text("Query: ", classes=[]), anno.Text(para.query, classes=[])]))
+        table = anno.Table()
 
-        page.add(
-            anno.Choice(
-                label="Label",
-                options=["no significant difference", "significantly increased", "significantly decreased"],
-                tablename="label",
-                info_dict={"annotation_id": para.annotation_id},
-            )
+        table.add_row([anno.Text("Document :")], colspans=[2])
+        table.add_row(
+            [
+                anno.TypedTextBlock(
+                    words=[
+                        anno.Text(text=word, info_dict={"word_id": i})
+                        for i, word in enumerate(document_words)
+                    ],
+                    tablename="rationale_words",
+                    info_dict={"annotation_id": para.annotation_id},
+                    entity_labels=["POPL", "INTV", "OUTCOME", "CONTROL"],
+                )
+            ],
+            colspans=[2]
         )
+        table.add_row(
+            [
+                anno.TextBlock(words=[anno.Text("Query: "), anno.Text(para.query)]),
+                anno.Choice(
+                    label="Label",
+                    options=[
+                        "no significant difference",
+                        "significantly increased",
+                        "significantly decreased",
+                    ],
+                    tablename="label",
+                    info_dict={"annotation_id": para.annotation_id},
+                ),
+            ], 
+        )
+
+        page.add(table)
         page.add(anno.HorizontalLine())
 
     return page

@@ -7,6 +7,11 @@ import random
 if not exist_table("history") :
     create_table("history", { "username" : str, "idx" : str, "value" : int })
 
+def get_all_usernames() :
+    rows: List[dict] = dbapi.filter_rows(tablename="history", keys={})
+    usernames = sorted(list(set([row["username"] for row in rows])))
+    return usernames
+
 def get_history(dataset_idx: List[str], username: str) -> Dict[str, bool]:
     rows: List[dict] = dbapi.filter_rows(tablename="history", keys={"username" : username})
     assignments: Dict[str, bool] = {}
