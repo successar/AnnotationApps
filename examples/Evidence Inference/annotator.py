@@ -1,7 +1,7 @@
-from typing import Any, Dict, List, Tuple
 import json
-
 from dataclasses import dataclass
+from typing import Any, Dict, List, Tuple
+
 import streamlit as st
 from AnnotationApps import html_element as anno
 from AnnotationApps.basic_annotator import basic_annotator
@@ -57,10 +57,10 @@ def display(document: Any, username: str, assignment: str, key: str) -> anno.Pag
                     ],
                     tablename="rationale_words",
                     info_dict={"annotation_id": para.annotation_id},
-                    entity_labels=["POPL", "INTV", "OUTCOME", "CONTROL"],
+                    entity_labels=["P", "I", "O", "C"],
                 )
             ],
-            colspans=[2]
+            colspans=[2],
         )
         table.add_row(
             [
@@ -75,7 +75,7 @@ def display(document: Any, username: str, assignment: str, key: str) -> anno.Pag
                     tablename="label",
                     info_dict={"annotation_id": para.annotation_id},
                 ),
-            ], 
+            ],
         )
 
         page.add(table)

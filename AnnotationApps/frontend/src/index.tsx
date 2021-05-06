@@ -1,7 +1,7 @@
 import { Streamlit, RenderData } from "streamlit-component-lib"
 import $ from "jquery"
 import { highlight_return, highlight_setup } from "./mark"
-import { checkbox_return, select_return } from "./widgets"
+import { checkbox_return, select_return, textbox_return } from "./widgets"
 
 let state = "idle";
 
@@ -15,6 +15,7 @@ function get_component_values() {
     values = values.concat($("input[type=checkbox].db").map(checkbox_return).get());
     values = values.concat($(".highlight").map(highlight_return).get());
     values = values.concat($("select.db").map(select_return).get());
+    values = values.concat($("input[type=text].db").map(textbox_return).get());
     return values;
 };
 

@@ -4,12 +4,14 @@ from sqlalchemy.orm import scoped_session
 
 session = scoped_session(SessionDB)
 
+from typing import List
+
 def add(tablename, keys, value):
     models.add(session, tablename, keys, value)
 
 
-def delete(tablename, keys, value):
-    models.delete(session, tablename, keys, value)
+def delete(tablename, keys):
+    models.delete(session, tablename, keys)
 
 
 def filter_rows(tablename, keys):

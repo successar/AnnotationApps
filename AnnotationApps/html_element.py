@@ -14,7 +14,7 @@ def create_table_from_info(tablename, info_dict, value):
 
 
 class Page:
-    def __init__(self, common_dict):
+    def __init__(self, common_dict, add_next=True):
         self._elements = []
         self._common_dict = common_dict
         self._css = {}
@@ -23,7 +23,7 @@ class Page:
         common_block = f'<div data-type="common" {data_string}></div>'
         self._elements.append(common_block)
 
-        self._add_saving_group()
+        self._add_saving_group(add_next)
 
     def add_format(self, label: str, format: Dict[str, str]):
         self._css[label] = "{\n" + "\n".join(f"{k}: {v};" for k, v in format.items()) + "\n}"
@@ -45,11 +45,11 @@ class Page:
     def _button(label: str, _id: str, _type: str = "primary"):
         return f'<button type="button" class="btn btn-{_type}" id="{_id}">{label}</button>'
 
-    def _add_saving_group(self):
+    def _add_saving_group(self, add_next):
         self._elements.append(
             f"""
             <div class="btn-group" role="group">
-                {self._button("Save And Next", "savenext", "success")}
+                {self._button("Save And Next", "savenext", "success") if add_next else ""}
                 {self._button("Save", "save", "primary")}
             </div>
             """
@@ -161,11 +161,11 @@ class Text(Widget):
 
 
 class TextBlock(Widget):
-    def __init__(self, words):
-        self._words = words
+    def __init__(self, elements):
+        self._elements = elements
 
     def construct(self, info_dict=None):
-        return " ".join([word.construct() for word in self._words])
+        return " ".join([word.construct(info_dict) for word in self._elements])
 
 
 class TypedTextBlock(Widget):

@@ -33,3 +33,20 @@ export function checkbox_return() {
         "value": 1
     }
 }
+
+export function textbox_return() {
+    let common_data = $("div[data-type=common]").data();
+    let specific_data = $(this).data();
+    let db_data = { ...common_data, ...specific_data };
+    delete db_data["type"];
+
+    let tablename = db_data["tablename"];
+    delete db_data["tablename"]
+
+    return {
+        "api": "add",
+        "tablename": tablename,
+        "keys": db_data,
+        "value": $(this).val()
+    }
+}

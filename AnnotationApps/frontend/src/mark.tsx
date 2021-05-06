@@ -22,8 +22,8 @@ export function highlight_return() {
 
         let map = dictionary(data);
 
-        map["span-start"] = $(this).attr("data-span-start");
-        map["span-end"] = $(this).attr("data-span-end");
+        map["span-start"] = parseInt($(this).attr("data-span-start"));
+        map["span-end"] = parseInt($(this).attr("data-span-end"));
 
         delete map["block_pos"];
 
@@ -65,38 +65,47 @@ function appendButtonToMark(mark_element) {
     mark_element.appendChild(mark_button);
 }
 
-export function highlight() {
+function setupModal(mark_element) {
+
+}
+
+function highlight() {
     var sel = window.getSelection();
     if (sel) {
-        var range = sel.getRangeAt(0);
-        var selectedNodes = getRangeSelectedNodes(range);
-        let highlightable_nodes: Array<Node> = filter_to_highlightable(selectedNodes);
-        removeMarked(highlightable_nodes);
-        if (highlightable_nodes.length > 0 && highlightable_nodes.every(node => node.parentNode === highlightable_nodes[0].parentNode)) {
-            let marked_range = new Range();
-            marked_range.setStartBefore(highlightable_nodes[0]);
-            marked_range.setEndAfter(highlightable_nodes[highlightable_nodes.length - 1]);
+        if (sel.toString().length > 0) {
+            var range = sel.getRangeAt(0);
+            var selectedNodes = getRangeSelectedNodes(range);
+            let highlightable_nodes: Array<Node> = filter_to_highlightable(selectedNodes);
+            removeMarked(highlightable_nodes);
+            if (highlightable_nodes.length > 0 && highlightable_nodes.every(node => node.parentNode === highlightable_nodes[0].parentNode)) {
+                let marked_range = new Range();
+                marked_range.setStartBefore(highlightable_nodes[0]);
+                marked_range.setEndAfter(highlightable_nodes[highlightable_nodes.length - 1]);
 
-            // Create a Mark element to surround the selection
-            let mark_element = document.createElement("mark");
+                // Create a Mark element to surround the selection
+                let mark_element = document.createElement("mark");
 
-            // Add Span Type to the Mark
-            let parent = highlightable_nodes[0].parentNode;
-            let span_type_radio_id = $(parent).children("div[data-type=type-selector]").attr("data-radio-id");
-            let span_type: string = ($(`input[name=${span_type_radio_id}]:checked`).val() as string);
-            span_type = span_type ? span_type : "UNK";
-            $(mark_element).attr("data-span-type", span_type);
+                // Add Span Type to the Mark
+                let parent = highlightable_nodes[0].parentNode;
+                let span_type_radio_id = $(parent).children("div[data-type=type-selector]").attr("data-radio-id");
+                let span_type: string = ($(`input[name=${span_type_radio_id}]:checked`).val() as string);
+                span_type = span_type ? span_type : "UNK";
+                $(mark_element).attr("data-span-type", span_type);
 
-            // Calculate Span Start and Span End Positions 
-            let positions = highlightable_nodes.map(node => parseInt($(node).attr("data-block_pos")));
-            let span_start = Math.min(...positions);
-            let span_end = Math.max(...positions) + 1;
+                // Calculate Span Start and Span End Positions 
+                let positions = highlightable_nodes.map(node => parseInt($(node).attr("data-block_pos")));
+                let span_start = Math.min(...positions);
+                let span_end = Math.max(...positions) + 1;
 
-            $(mark_element).attr("data-span-start", span_start);
-            $(mark_element).attr("data-span-end", span_end);
+                $(mark_element).attr("data-span-start", span_start);
+                $(mark_element).attr("data-span-end", span_end);
+                $(mark_element).on("click", function() {
+                    alert("Mark clicked");
+                })
 
-            marked_range.surroundContents(mark_element);
-            appendButtonToMark(mark_element);
+                marked_range.surroundContents(mark_element);
+                appendButtonToMark(mark_element);
+            }
         }
 
         sel.removeAllRanges();

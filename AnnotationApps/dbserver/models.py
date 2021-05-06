@@ -33,7 +33,7 @@ def add(ses, table, keys, value):
     ses.commit()
 
 
-def delete(ses, table, keys, value):  # value is ignored
+def delete(ses, table, keys):
     assert all([key in keys or key == "value" for key in tables[table].__table__.columns.keys()])
     ses.query(tables[table]).filter_by(**keys).delete()
     ses.commit()
